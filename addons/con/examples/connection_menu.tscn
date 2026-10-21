@@ -34,10 +34,20 @@ theme_override_constants/margin_bottom = 28
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="AddressLabel" type="Label" parent="Center/Panel/Margin/VBox" unique_id=913110166]
+[node name="MethodLabel" type="Label" parent="Center/Panel/Margin/VBox" unique_id=2111158122]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.658824, 0.690196, 0.760784, 1)
-text = "Address"
+text = "Connection method"
+
+[node name="Method" type="OptionButton" parent="Center/Panel/Margin/VBox" unique_id=2045256344]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AddressLabel" type="Label" parent="Center/Panel/Margin/VBox" unique_id=913110166]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.690196, 0.760784, 1)
+text = "Host address"
 
 [node name="Address" type="LineEdit" parent="Center/Panel/Margin/VBox" unique_id=1438110294]
 unique_name_in_owner = true
@@ -47,6 +57,7 @@ placeholder_text = "127.0.0.1"
 clear_button_enabled = true
 
 [node name="PortLabel" type="Label" parent="Center/Panel/Margin/VBox" unique_id=1756502251]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.658824, 0.690196, 0.760784, 1)
 text = "Port"
@@ -84,6 +95,34 @@ layout_mode = 2
 size_flags_horizontal = 3
 disabled = true
 text = "Disconnect"
+
+[node name="HostIdSection" type="VBoxContainer" parent="Center/Panel/Margin/VBox" unique_id=338670661]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HostIdLabel" type="Label" parent="Center/Panel/Margin/VBox/HostIdSection" unique_id=196873463]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.658824, 0.690196, 0.760784, 1)
+text = "Your Steam ID (share this)"
+
+[node name="HostIdRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/HostIdSection" unique_id=129338592]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HostId" type="LineEdit" parent="Center/Panel/Margin/VBox/HostIdSection/HostIdRow" unique_id=236419035]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
+select_all_on_focus = true
+
+[node name="CopyIdButton" type="Button" parent="Center/Panel/Margin/VBox/HostIdSection/HostIdRow" unique_id=1198400920]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+text = "Copy"
 
 [node name="HSeparator" type="HSeparator" parent="Center/Panel/Margin/VBox" unique_id=1574891536]
 layout_mode = 2
