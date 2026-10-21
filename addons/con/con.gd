@@ -16,6 +16,10 @@ signal disconnected
 signal client_joined(id: int)
 ## Emitted when another peer has disconnected from this server.
 signal client_left(id: int)
+## Emitted when [method connect_to] receives an invalid IP address.
+signal ip_invalid(address: String)
+## Emitted when [method host] or [method connect_to] receives an invalid port.
+signal port_invalid(port: int)
 
 ## Network role of the current peer.
 enum Role {NONE, HOST, CLIENT}
@@ -47,10 +51,10 @@ func _ready() -> void:
 
 ## Start a server.
 func host() -> Error:
-	if PORT < 1 or PORT > 65535:
+	if not is_valid_port(PORT):
 		var error := ERR_INVALID_PARAMETER
 		push_error("Con: invalid port %d." % PORT)
-		host_failed.emit(error)
+		port_invalid.emit(PORT)
 		return error
 
 	_reset_peer()
@@ -69,15 +73,28 @@ func host() -> Error:
 	return OK
 
 
+## Whether the given string is a valid IP address.
+func is_valid_ip(address: String) -> bool:
+	return address.strip_edges().is_valid_ip_address()
+
+
+## Whether the given number is a valid port.
+func is_valid_port(port: int) -> bool:
+	return port >= 1 and port <= 65535
+
+
 ## Connect to a server.
 func connect_to(address: String = DEFAULT_ADDRESS) -> Error:
 	address = address.strip_edges()
-	if address.is_empty():
-		address = DEFAULT_ADDRESS
-	if PORT < 1 or PORT > 65535:
+	if not address.is_valid_ip_address():
+		var error := ERR_INVALID_PARAMETER
+		push_error("Con: invalid IP address \"%s\"." % address)
+		ip_invalid.emit(address)
+		return error
+	if not is_valid_port(PORT):
 		var error := ERR_INVALID_PARAMETER
 		push_error("Con: invalid PORT %d." % PORT)
-		connection_failed.emit()
+		port_invalid.emit(PORT)
 		return error
 
 	_reset_peer()

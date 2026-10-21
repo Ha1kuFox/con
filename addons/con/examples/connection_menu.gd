@@ -19,11 +19,14 @@ func _ready() -> void:
 	Con.disconnected.connect(_on_disconnected)
 	Con.client_joined.connect(_on_client_joined)
 	Con.client_left.connect(_on_client_left)
+	Con.ip_invalid.connect(_on_ip_invalid)
 
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)
 	disconnect_button.pressed.connect(_on_disconnect_pressed)
+	address_edit.text_changed.connect(_on_address_changed)
 
+	_on_address_changed(address_edit.text)
 	_set_status("Not connected. Host a game or join one.")
 	_update_controls()
 
@@ -87,6 +90,23 @@ func _on_client_left(id: int) -> void:
 	_set_status("Player %d left. %d player(s) connected." % [id, Con.get_client_ids().size() + 1])
 
 
+func _on_ip_invalid(address: String) -> void:
+	_set_ip_invalid(true)
+	_set_status("Invalid IP address: \"%s\"." % address)
+
+
+func _on_address_changed(text: String) -> void:
+	_set_ip_invalid(not Con.is_valid_ip(text))
+	_update_controls()
+
+
+func _set_ip_invalid(invalid: bool) -> void:
+	if invalid:
+		address_edit.add_theme_color_override("font_color", Color.RED)
+	else:
+		address_edit.remove_theme_color_override("font_color")
+
+
 func _set_status(text: String) -> void:
 	status_label.text = text
 
@@ -98,3 +118,5 @@ func _update_controls() -> void:
 	disconnect_button.disabled = not active
 	address_edit.editable = not active
 	port_spin.editable = not active
+	if active:
+		_set_ip_invalid(false)
