@@ -13,7 +13,6 @@ config_version=5
 config/name="Con"
 run/main_scene="uid://x0yedx4uwnwo"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
 
 [autoload]
 
