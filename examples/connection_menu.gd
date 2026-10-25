@@ -56,7 +56,7 @@ func _ready() -> void:
 func _on_host_pressed() -> void:
 	Con.connection_method = method_option.get_item_id(method_option.selected)
 	Con.PORT = int(port_spin.value)
-	var error := Con.host()
+	var error: Error = Con.host()
 	if error != OK:
 		_update_controls()
 		return
@@ -67,7 +67,7 @@ func _on_join_pressed() -> void:
 	Con.connection_method = method_option.get_item_id(method_option.selected)
 	Con.PORT = int(port_spin.value)
 	var address := address_edit.text.strip_edges()
-	var error := Con.connect_to(address)
+	var error: Error = Con.connect_to(address)
 	if error != OK:
 		_update_controls()
 		return
@@ -159,7 +159,7 @@ func _on_method_selected(index: int) -> void:
 		_local_address = address_edit.text
 
 	Con.connection_method = method_option.get_item_id(index)
-	var steam := Con.connection_method == Con.ConnectionMethod.STEAM
+	var steam: int = Con.connection_method == Con.ConnectionMethod.STEAM
 
 	address_label.text = "Host Steam ID" if steam else "Host address"
 	address_edit.placeholder_text = "Host's Steam ID64" if steam else Con.DEFAULT_ADDRESS
@@ -206,9 +206,9 @@ func _set_status(text: String) -> void:
 
 
 func _update_controls() -> void:
-	var active := Con.is_active()
-	var hosting := Con.is_host()
-	var steam := Con.connection_method == Con.ConnectionMethod.STEAM
+	var active: bool = Con.is_active()
+	var hosting: bool = Con.is_host()
+	var steam: bool = Con.connection_method == Con.ConnectionMethod.STEAM
 
 	method_option.disabled = active
 	host_button.disabled = active
@@ -226,7 +226,7 @@ func _update_controls() -> void:
 
 
 func _update_host_id() -> void:
-	var steam_id := Con.get_steam_id() if Con.is_host() and Con.connection_method == Con.ConnectionMethod.STEAM else 0
+	var steam_id: int = Con.get_steam_id() if Con.is_host() and Con.connection_method == Con.ConnectionMethod.STEAM else 0
 	host_id_section.visible = steam_id > 0
 	host_id_edit.text = str(steam_id) if steam_id > 0 else ""
 	if not host_id_section.visible:
