@@ -1,3 +1,4 @@
+class_name ConConnection
 extends Node
 
 # TODO: make this simpler to use, likely by merging some signals idk.
@@ -35,31 +36,31 @@ enum Role {NONE, HOST, CLIENT}
 ## Available ways to host or join a game.
 enum ConnectionMethod {LOCAL, STEAM}
 
-const DEFAULT_PORT := 20220
-const DEFAULT_ADDRESS := "127.0.0.1"
-const DEFAULT_MAX_CLIENTS := 8
-const DEFAULT_CONNECTION_TIMEOUT := 10.0
+const DEFAULT_PORT: int = 20220
+const DEFAULT_ADDRESS: String = "127.0.0.1"
+const DEFAULT_MAX_CLIENTS: int = 8
+const DEFAULT_CONNECTION_TIMEOUT: float = 10.0
 ## Virtual port used by [SteamMultiplayerPeer]. Kept at 0 for regular games.
-const STEAM_VIRTUAL_PORT := 0
+const STEAM_VIRTUAL_PORT: int = 0
 
 ## Enable debug info logging.
-var debug_enabled := false
+var debug_enabled: bool = false
 ## Transport used by [method host] and [method connect_to].
 var connection_method: ConnectionMethod = ConnectionMethod.LOCAL
 ## Steam App ID used when Steam is initialized lazily. 0 uses project settings or the environment.
-var steam_app_id := 0
+var steam_app_id: int = 0
 ## Seconds to wait for a client connection before giving up.
-var connection_timeout := DEFAULT_CONNECTION_TIMEOUT
+var connection_timeout: float = DEFAULT_CONNECTION_TIMEOUT
 ## Port used to create a local server or client.
-var PORT := DEFAULT_PORT
+var PORT: int = DEFAULT_PORT
 ## Maximum number of clients allowed on a local server.
-var MAX_CLIENTS := DEFAULT_MAX_CLIENTS
+var MAX_CLIENTS: int = DEFAULT_MAX_CLIENTS
 ## Current network peer, or [code]null[/code] when not connected.
 var current_peer: MultiplayerPeer
 ## Current peer network role.
 var role: Role = Role.NONE
 
-var _is_connected := false
+var _is_connected: bool = false
 var _connection_timer: Timer
 
 
@@ -86,7 +87,7 @@ func host() -> Error:
 		ConnectionMethod.STEAM:
 			return _host_steam()
 
-	push_error("Con: unknown connection method %d." % connection_method)
+	L.error("Con: unknown connection method %d." % connection_method)
 	return ERR_INVALID_PARAMETER
 
 
@@ -100,7 +101,7 @@ func connect_to(address: String = DEFAULT_ADDRESS) -> Error:
 		ConnectionMethod.STEAM:
 			return _connect_steam(address)
 
-	push_error("Con: unknown connection method %d." % connection_method)
+	L.error("Con: unknown connection method %d." % connection_method)
 	return ERR_INVALID_PARAMETER
 
 
@@ -116,7 +117,7 @@ func is_valid_port(port: int) -> bool:
 
 ## Whether the given string is a valid Steam ID.
 func is_valid_steam_id(steam_id: String) -> bool:
-	var value := steam_id.strip_edges()
+	var value: String = steam_id.strip_edges()
 	return value.is_valid_int() and int(value) > 0
 
 
@@ -129,7 +130,7 @@ func is_steam_available() -> bool:
 func is_steam_ready() -> bool:
 	if not is_steam_available():
 		return false
-	var steam = Engine.get_singleton("Steam")
+	var steam: Object = Engine.get_singleton("Steam")
 	var result: Dictionary = steam.call("get_steam_init_result")
 	if result.is_empty() or int(result.get("status", 1)) != 0:
 		return false
@@ -145,16 +146,16 @@ func get_steam_id() -> int:
 
 func _host_local() -> Error:
 	if not is_valid_port(PORT):
-		var error := ERR_INVALID_PARAMETER
-		push_error("Con: invalid port %d." % PORT)
+		var error: Error = ERR_INVALID_PARAMETER
+		L.error("Con: invalid port %d." % PORT)
 		port_invalid.emit(PORT)
 		return error
 
 	_reset_peer()
-	var peer := ENetMultiplayerPeer.new()
-	var error := peer.create_server(PORT, MAX_CLIENTS)
+	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
+	var error: Error = peer.create_server(PORT, MAX_CLIENTS)
 	if error != OK:
-		push_error("Con: could not host on PORT %d: %s" % [PORT, error_string(error)])
+		L.error("Con: could not host on PORT %d: %s" % [PORT, error_string(error)])
 		host_failed.emit(error)
 		return error
 
@@ -167,7 +168,7 @@ func _host_local() -> Error:
 
 
 func _host_steam() -> Error:
-	var error := _ensure_steam()
+	var error: Error = _ensure_steam()
 	if error != OK:
 		return error
 
@@ -179,7 +180,7 @@ func _host_steam() -> Error:
 	peer.set("server_relay", true)
 	error = int(peer.call("create_host", STEAM_VIRTUAL_PORT))
 	if error != OK:
-		push_error("Con: could not host via Steam: %s" % error_string(error))
+		L.error("Con: could not host via Steam: %s" % error_string(error))
 		host_failed.emit(error)
 		return error
 
@@ -193,21 +194,21 @@ func _host_steam() -> Error:
 
 func _connect_local(address: String) -> Error:
 	if not address.is_valid_ip_address():
-		var error := ERR_INVALID_PARAMETER
-		push_error("Con: invalid IP address \"%s\"." % address)
+		var error: Error = ERR_INVALID_PARAMETER
+		L.error("Con: invalid IP address \"%s\"." % address)
 		ip_invalid.emit(address)
 		return error
 	if not is_valid_port(PORT):
-		var error := ERR_INVALID_PARAMETER
-		push_error("Con: invalid PORT %d." % PORT)
+		var error: Error = ERR_INVALID_PARAMETER
+		L.error("Con: invalid PORT %d." % PORT)
 		port_invalid.emit(PORT)
 		return error
 
 	_reset_peer()
-	var peer := ENetMultiplayerPeer.new()
-	var error := peer.create_client(address, PORT)
+	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
+	var error: Error = peer.create_client(address, PORT)
 	if error != OK:
-		push_error("Con: could not connect to %s:%d: %s" % [address, PORT, error_string(error)])
+		L.error("Con: could not connect to %s:%d: %s" % [address, PORT, error_string(error)])
 		connection_failed.emit()
 		return error
 
@@ -222,18 +223,18 @@ func _connect_local(address: String) -> Error:
 
 func _connect_steam(steam_id: String) -> Error:
 	if not is_valid_steam_id(steam_id):
-		var error := ERR_INVALID_PARAMETER
-		push_error("Con: invalid Steam ID \"%s\"." % steam_id)
+		var error: Error = ERR_INVALID_PARAMETER
+		L.error("Con: invalid Steam ID \"%s\"." % steam_id)
 		steam_id_invalid.emit(steam_id)
 		return error
 
-	var error := _ensure_steam()
+	var error: Error = _ensure_steam()
 	if error != OK:
 		return error
 
-	var local_steam_id := get_steam_id()
+	var local_steam_id: int = get_steam_id()
 	if local_steam_id > 0 and int(steam_id) == local_steam_id:
-		push_error("Con: cannot connect to your own Steam ID \"%s\"." % steam_id)
+		L.error("Con: cannot connect to your own Steam ID \"%s\"." % steam_id)
 		steam_self_connect.emit(steam_id)
 		return ERR_INVALID_PARAMETER
 
@@ -245,7 +246,7 @@ func _connect_steam(steam_id: String) -> Error:
 	peer.set("server_relay", true)
 	error = int(peer.call("create_client", int(steam_id), STEAM_VIRTUAL_PORT))
 	if error != OK:
-		push_error("Con: could not connect to Steam ID %s: %s" % [steam_id, error_string(error)])
+		L.error("Con: could not connect to Steam ID %s: %s" % [steam_id, error_string(error)])
 		connection_failed.emit()
 		return error
 
@@ -263,14 +264,14 @@ func _ensure_steam() -> Error:
 		_fail_steam("GodotSteam is not installed.")
 		return ERR_UNAVAILABLE
 
-	var steam = Engine.get_singleton("Steam")
+	var steam: Object = Engine.get_singleton("Steam")
 	var result: Dictionary = steam.call("get_steam_init_result")
 	if result.is_empty():
 		result = steam.call("steamInitEx", steam_app_id, true)
 
-	var status := int(result.get("status", 1))
+	var status: int = int(result.get("status", 1))
 	if status != 0:
-		var reason := String(result.get("verbal", "unknown error"))
+		var reason: String = String(result.get("verbal", "unknown error"))
 		_fail_steam("Steam initialization failed: %s" % reason)
 		return ERR_UNAVAILABLE
 	if not bool(steam.call("loggedOn")):
@@ -280,7 +281,7 @@ func _ensure_steam() -> Error:
 
 
 func _fail_steam(reason: String) -> void:
-	push_error("Con: %s" % reason)
+	L.error("Con: %s" % reason)
 	steam_unavailable.emit(reason)
 
 
@@ -333,7 +334,7 @@ func get_client_ids() -> PackedInt32Array:
 
 ## Release the peer and reset state without emitting any signals.
 func _reset_peer() -> void:
-	var peer := current_peer
+	var peer: MultiplayerPeer = current_peer
 	current_peer = null
 	role = Role.NONE
 	_is_connected = false
@@ -389,4 +390,4 @@ func _on_peer_disconnected(id: int) -> void:
 
 func _log(text: String) -> void:
 	if debug_enabled:
-		print("Con: %s" % text)
+		L.debug("Con: %s" % text)

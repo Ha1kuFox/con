@@ -13,8 +13,8 @@ extends Control
 @onready var copy_id_button: Button = %CopyIdButton
 @onready var status_label: Label = %Status
 
-var _local_address := ""
-var _steam_id := ""
+var _local_address: String = ""
+var _steam_id: String = ""
 
 
 func _ready() -> void:
@@ -66,7 +66,7 @@ func _on_host_pressed() -> void:
 func _on_join_pressed() -> void:
 	Con.connection_method = method_option.get_item_id(method_option.selected)
 	Con.PORT = int(port_spin.value)
-	var address := address_edit.text.strip_edges()
+	var address: String = address_edit.text.strip_edges()
 	var error: Error = Con.connect_to(address)
 	if error != OK:
 		_update_controls()
@@ -176,7 +176,7 @@ func _on_address_changed(text: String) -> void:
 
 
 func _is_target_valid() -> bool:
-	var target := address_edit.text.strip_edges()
+	var target: String = address_edit.text.strip_edges()
 	if target.is_empty():
 		return false
 	if Con.connection_method == Con.ConnectionMethod.STEAM:
