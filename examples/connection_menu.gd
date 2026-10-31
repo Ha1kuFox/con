@@ -148,7 +148,9 @@ func _on_steam_unavailable(reason: String) -> void:
 
 func _on_steam_self_connect(_steam_id: String) -> void:
 	_set_address_invalid(true)
-	_set_status("That's your own Steam ID. Use the host's ID from another Steam account, or test with Local mode.")
+	_set_status(
+		"That's your own Steam ID. Use the host's ID from another Steam account, or test with Local mode."
+	)
 	_update_controls()
 
 
@@ -226,7 +228,11 @@ func _update_controls() -> void:
 
 
 func _update_host_id() -> void:
-	var steam_id: int = Con.get_steam_id() if Con.is_host() and Con.connection_method == Con.ConnectionMethod.STEAM else 0
+	var steam_id: int = (
+		Con.get_steam_id()
+		if (Con.is_host() and Con.connection_method == Con.ConnectionMethod.STEAM)
+		else 0
+	)
 	host_id_section.visible = steam_id > 0
 	host_id_edit.text = str(steam_id) if steam_id > 0 else ""
 	if not host_id_section.visible:

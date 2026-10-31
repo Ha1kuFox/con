@@ -32,9 +32,16 @@ signal steam_self_connect(steam_id: String)
 signal connection_timed_out
 
 ## Network role of the current peer.
-enum Role {NONE, HOST, CLIENT}
+enum Role {
+	NONE,
+	HOST,
+	CLIENT,
+}
 ## Available ways to host or join a game.
-enum ConnectionMethod {LOCAL, STEAM}
+enum ConnectionMethod {
+	LOCAL,
+	STEAM,
+}
 
 const DEFAULT_PORT: int = 20220
 const DEFAULT_ADDRESS: String = "127.0.0.1"
